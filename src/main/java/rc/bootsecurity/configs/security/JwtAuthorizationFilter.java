@@ -8,9 +8,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.stereotype.Component;
+import rc.bootsecurity.dtos.User;
 import rc.bootsecurity.entities.UserEntity;
 import rc.bootsecurity.repository.UserRepository;
-import rc.bootsecurity.dtos.User;
+import rc.bootsecurity.services.UserService;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -21,14 +23,11 @@ import java.io.IOException;
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
-    private final UserRepository userRepository;
+    private final UserService userService;
 
-    @Autowired
-    private ModelMapper modelMapper;
-
-    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, UserRepository userRepository) {
+    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, UserService userService) {
         super(authenticationManager);
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     @Override
@@ -52,23 +51,19 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     private Authentication getUsernamePasswordAuthentication(HttpServletRequest request) {
         String token = request.getHeader(JwtProperties.HEADER_STRING)
-                .replace(JwtProperties.TOKEN_PREFIX,"");
+                .replace(JwtProperties.TOKEN_PREFIX, "");
 
-        if (token != null) {
-            // parse the token and validate it
-            String userName = JWT.require(HMAC512(JwtProperties.SECRET.getBytes()))
-                    .build()
-                    .verify(token)
-                    .getSubject();
+        // parse the token and validate it
+        String username = JWT.require(HMAC512(JwtProperties.SECRET.getBytes()))
+                .build()
+                .verify(token)
+                .getSubject();
 
-            // Search in the DB if we find the user by token subject (username)
-            // If so, then grab user details and create spring auth token using username, pass, authorities/roles
-            if (userName != null) {
-                UserEntity userEntity = userRepository.findByUsername(userName);  // TODO call service method
-                UserPrincipal principal = new UserPrincipal(modelMapper.map(userEntity, User.class));
-                return new UsernamePasswordAuthenticationToken(userName, null, principal.getAuthorities());
-            }
-            return null;
+        // Search in the DB if we find the user by token subject (username)
+        // If so, then grab user details and create spring auth token using username, pass, authorities/roles
+        if (username != null) {
+            UserPrincipal principal = new UserPrincipal(userService.getUserByUsername(username));
+            return new UsernamePasswordAuthenticationToken(username, null, principal.getAuthorities());
         }
         return null;
     }

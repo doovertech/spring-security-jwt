@@ -1,5 +1,5 @@
 package rc.bootsecurity.dtos;
 
 public enum RoleType {
-  SALES_MANAGER, CLIENT
+    ADMIN, SALES_MANAGER, CLIENT
 }

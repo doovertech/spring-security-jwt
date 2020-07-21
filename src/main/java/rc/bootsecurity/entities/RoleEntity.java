@@ -2,7 +2,6 @@ package rc.bootsecurity.entities;
 
 import lombok.Data;
 import rc.bootsecurity.dtos.RoleType;
-import rc.bootsecurity.dtos.User;
 
 import javax.persistence.*;
 
@@ -11,18 +10,31 @@ import javax.persistence.*;
 @Table(name = "roles")
 public class RoleEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private long userRoleId;
+    @Id
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "roles_seq")
+    @SequenceGenerator(
+            name = "roles_seq",
+            sequenceName = "roles_role_id_seq", allocationSize = 1)
+    private long roleId;
 
-  private RoleType role;
+    @Enumerated(EnumType.STRING)
+    private RoleType role;
 
-  private String description;
+    private String description;
 
-  private String permission;
+    public RoleEntity(RoleType role) {
+        this.role = role;
+    }
 
-  @ManyToOne
-  @JoinColumn(name="user_id", nullable=false)
-  private User user;
+    /*public RoleEntity(String toString) {
+        this.role = toString;
+    }*/
+
+  /*private String permission;
+
+  @ManyToMany
+  private Set<UserEntity> user;*/
 
 }

@@ -16,18 +16,22 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import rc.bootsecurity.repository.UserRepository;
+import rc.bootsecurity.services.UserService;
 
 import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
-    private UserPrincipalDetailsService userPrincipalDetailsService;
-    private UserRepository userRepository;
+    private final UserPrincipalDetailsService userPrincipalDetailsService;
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
-    public WebSecurityConfiguration(UserPrincipalDetailsService userPrincipalDetailsService, UserRepository userRepository) {
+    public WebSecurityConfiguration(UserPrincipalDetailsService userPrincipalDetailsService, UserService userService,
+                                    PasswordEncoder passwordEncoder) {
         this.userPrincipalDetailsService = userPrincipalDetailsService;
-        this.userRepository = userRepository;
+        this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -44,28 +48,23 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 // add jwt filters (1. authentication, 2. authorization)
                 .addFilter(new JwtAuthenticationFilter(authenticationManager()))
-                .addFilter(new JwtAuthorizationFilter(authenticationManager(),  this.userRepository))
+                .addFilter(new JwtAuthorizationFilter(authenticationManager(), this.userService))
                 .authorizeRequests()
                 // configure access rules
                 .antMatchers(HttpMethod.POST, "/login").permitAll()
                 .antMatchers(HttpMethod.POST, "/users/sign-up").permitAll()
                 .antMatchers("/api/public/management/*").hasRole("MANAGER")
-                .antMatchers("/api/public/admin/*").hasRole("ADMIN")
+                .antMatchers("/api/public/admin/*").permitAll()
                 .anyRequest().authenticated();
     }
 
     @Bean
-    DaoAuthenticationProvider authenticationProvider(){
+    DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
         daoAuthenticationProvider.setUserDetailsService(this.userPrincipalDetailsService);
 
         return daoAuthenticationProvider;
-    }
-
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     @Bean

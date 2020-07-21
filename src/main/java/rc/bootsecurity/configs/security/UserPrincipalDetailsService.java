@@ -5,9 +5,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import rc.bootsecurity.dtos.User;
 import rc.bootsecurity.entities.UserEntity;
 import rc.bootsecurity.repository.UserRepository;
-import rc.bootsecurity.dtos.User;
 
 @Service
 public class UserPrincipalDetailsService implements UserDetailsService {

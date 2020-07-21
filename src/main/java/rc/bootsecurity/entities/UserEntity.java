@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -14,25 +13,36 @@ import java.util.Set;
 @Table(name = "users")
 public class UserEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private long userId;
+    @Id
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "users_seq")
+    @SequenceGenerator(
+            name = "users_seq",
+            sequenceName = "users_user_id_seq", allocationSize = 1)
+    private long userId;
 
-  @Column(nullable = false)
-  private String username;
+    private String email;
+    private String firstName;
+    private String lastName;
 
-  @Column(nullable = false)
-  private String password;
+    @Column(nullable = false)
+    private String username;
 
-  // private int active;
+    @Column(nullable = false)
+    private String password;
 
-  private String roles;
+    // private int active;
 
-  @OneToMany(mappedBy = "user")
-  private Set<RoleEntity> rolesSet;
+  /*private String roles;
 
-  public UserEntity(String username, String password) {
-    this.username = username;
-    this.password = password;
-  }
+  @ManyToMany
+  private Set<RoleEntity> rolesSet;*/
+
+    public UserEntity(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
+
 }
