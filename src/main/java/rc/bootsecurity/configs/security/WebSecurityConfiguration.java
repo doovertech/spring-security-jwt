@@ -10,12 +10,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import rc.bootsecurity.repository.UserRepository;
 import rc.bootsecurity.services.UserService;
 
 import java.util.Arrays;
@@ -53,8 +51,9 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 // configure access rules
                 .antMatchers(HttpMethod.POST, "/login").permitAll()
                 .antMatchers(HttpMethod.POST, "/users/sign-up").permitAll()
-                .antMatchers("/api/public/management/*").hasRole("MANAGER")
-                .antMatchers("/api/public/admin/*").permitAll()
+                .antMatchers("/api/public/management/*").hasAnyRole("SALES_MANAGER", "ADMIN")
+                .antMatchers("/api/public/admin/*").hasRole("ADMIN")
+                .antMatchers("/users/").hasRole("ADMIN")
                 .anyRequest().authenticated();
     }
 

@@ -1,11 +1,15 @@
 package rc.bootsecurity.entities;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import rc.bootsecurity.dtos.RoleType;
 
 import javax.persistence.*;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "roles")
 public class RoleEntity {
