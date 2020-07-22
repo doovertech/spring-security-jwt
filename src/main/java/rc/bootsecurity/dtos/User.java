@@ -13,7 +13,9 @@ import java.util.List;
 @NoArgsConstructor
 public class User {
 
-    private long id;
+    private long userId;
+
+    private String email;
 
     private String username;
 
@@ -21,21 +23,21 @@ public class User {
 
     private boolean active = true;
 
-    private String roles = "";
+    private List<RoleType> roles;
 
-    private String permissions = "";
+    // private String permissions;
 
-    public List<String> getRoleList() {
-        if (this.roles.length() > 0) {
-            return Arrays.asList(this.roles.split(","));
+    /*public List<RoleType> getRoleList() {
+        if (this.roles.size() > 0) {
+            return roles;
         }
         return new ArrayList<>();
-    }
+    }*/
 
-    public List<String> getPermissionList() {
+    /*public List<String> getPermissionList() {
         if (this.permissions.length() > 0) {
             return Arrays.asList(this.permissions.split(","));
         }
         return new ArrayList<>();
-    }
+    }*/
 }

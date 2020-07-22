@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import rc.bootsecurity.dtos.AuthUser;
+import rc.bootsecurity.dtos.Role;
 import rc.bootsecurity.dtos.RoleType;
 import rc.bootsecurity.dtos.User;
 import rc.bootsecurity.entities.RoleEntity;
@@ -55,7 +56,7 @@ public class UserService {
 
         if (newUser.getRoles() != null && !newUser.getRoles().isEmpty()) {
             newUser.getRoles().forEach(roleType -> {
-                RoleEntity roleEntity = roleRepository.save(new RoleEntity(roleType));
+                RoleEntity roleEntity = roleRepository.findByRole(roleType);
                 UserRolesEntity userRolesEntity = new UserRolesEntity(userEntity.getUserId(), roleEntity.getRoleId());
                 userRolesRepository.save(userRolesEntity);
             });
@@ -68,7 +69,30 @@ public class UserService {
         List<User> users = new ArrayList<>();
 
         userRepository.findAll().forEach(userEntity -> users.add(modelMapper.map(userEntity, User.class)));
+
+        users.forEach(this::getUserRoles);
+
         return users;
+    }
+
+    public User getUserByUsername(String username) {
+        UserEntity userEntity = userRepository.findByUsername(username);
+
+        return getUserRoles(modelMapper.map(userEntity, User.class));
+    }
+
+    private User getUserRoles(User user) {
+        List<UserRolesEntity> userRolesEntities = userRolesRepository.findAllByUserId(user.getUserId());
+
+        List<RoleType> roles = new ArrayList<>();
+        userRolesEntities.forEach(userRolesEntity -> {
+            Role role = modelMapper.map(roleRepository.findById(userRolesEntity.getRoleId()).get(), Role.class);
+
+            roles.add(role.getRole());
+        });
+        user.setRoles(roles);
+
+        return user;
     }
 
     private void validatePassword(String password) {
@@ -79,7 +103,4 @@ public class UserService {
         }
     }
 
-    public User getUserByUsername(String username) {
-        return modelMapper.map(userRepository.findByUsername(username), User.class);
-    }
 }
