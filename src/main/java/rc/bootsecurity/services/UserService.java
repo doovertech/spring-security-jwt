@@ -56,7 +56,7 @@ public class UserService {
 
         if (newUser.getRoles() != null && !newUser.getRoles().isEmpty()) {
             newUser.getRoles().forEach(roleType -> {
-                RoleEntity roleEntity = roleRepository.save(new RoleEntity(roleType));
+                RoleEntity roleEntity = roleRepository.findByRole(roleType);
                 UserRolesEntity userRolesEntity = new UserRolesEntity(userEntity.getUserId(), roleEntity.getRoleId());
                 userRolesRepository.save(userRolesEntity);
             });
@@ -73,14 +73,6 @@ public class UserService {
         users.forEach(this::getUserRoles);
 
         return users;
-    }
-
-    private void validatePassword(String password) {
-        RuleResult passValidationResult = passwordValidator.validate(new PasswordData(password));
-        if (!passValidationResult.isValid()) {
-            String errorMessage = String.join("; ", passwordValidator.getMessages(passValidationResult));
-            throw new PasswordValidationException(errorMessage);
-        }
     }
 
     public User getUserByUsername(String username) {
@@ -102,4 +94,13 @@ public class UserService {
 
         return user;
     }
+
+    private void validatePassword(String password) {
+        RuleResult passValidationResult = passwordValidator.validate(new PasswordData(password));
+        if (!passValidationResult.isValid()) {
+            String errorMessage = String.join("; ", passwordValidator.getMessages(passValidationResult));
+            throw new PasswordValidationException(errorMessage);
+        }
+    }
+
 }
